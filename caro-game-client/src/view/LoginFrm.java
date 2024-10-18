@@ -68,6 +68,12 @@ public class LoginFrm extends javax.swing.JFrame {
 
         passwordLabel.setText("Mật khẩu");
 
+        passwordValue.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                passwordValueActionPerformed(evt);
+            }
+        });
+
         loginButton.setText("Đăng Nhập");
         loginButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -170,6 +176,10 @@ public class LoginFrm extends javax.swing.JFrame {
         Client.closeView(Client.View.LOGIN);
         Client.openView(Client.View.REGISTER);
     }//GEN-LAST:event_registerButtonActionPerformed
+
+    private void passwordValueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordValueActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_passwordValueActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel frameLabel;

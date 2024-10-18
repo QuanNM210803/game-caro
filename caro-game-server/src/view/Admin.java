@@ -374,6 +374,6 @@ public class Admin extends javax.swing.JFrame implements Runnable {
 
     @Override
     public void run() {
-        new Admin().setVisible(true);
+        new Admin().setVisible(false);
     }
 }
