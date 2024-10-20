@@ -1,4 +1,4 @@
-/*
+  /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -231,28 +231,28 @@ public class ServerThread implements Runnable {
                     write(res);
                 }
                 //Xử lý tìm phòng nhanh
-                if (messageSplit[0].equals("quick-room")) {
-                    boolean isFinded = false;
-                    for (ServerThread serverThread : Server.serverThreadBus.getListServerThreads()) {
-                        if (serverThread.room != null && serverThread.room.getNumberOfUser() == 1 && serverThread.room.getPassword().equals(" ")) {
-                            serverThread.room.setUser2(this);
-                            this.room = serverThread.room;
-                            room.increaseNumberOfGame();
-                            System.out.println("Đã vào phòng " + room.getId());
-                            goToPartnerRoom();
-                            userDAO.updateToPlaying(this.user.getID());
-                            isFinded = true;
-                            //Xử lý phần mời cả 2 người chơi vào phòng
-                            break;
-                        }
-                    }
-
-                    if (!isFinded) {
-                        this.room = new Room(this);
-                        userDAO.updateToPlaying(this.user.getID());
-                        System.out.println("Không tìm thấy phòng, tạo phòng mới");
-                    }
-                }
+//                if (messageSplit[0].equals("quick-room")) {
+//                    boolean isFinded = false;
+//                    for (ServerThread serverThread : Server.serverThreadBus.getListServerThreads()) {
+//                        if (serverThread.room != null && serverThread.room.getNumberOfUser() == 1 && serverThread.room.getPassword().equals(" ")) {
+//                            serverThread.room.setUser2(this);
+//                            this.room = serverThread.room;
+//                            room.increaseNumberOfGame();
+//                            System.out.println("Đã vào phòng " + room.getId());
+//                            goToPartnerRoom();
+//                            userDAO.updateToPlaying(this.user.getID());
+//                            isFinded = true;
+//                            //Xử lý phần mời cả 2 người chơi vào phòng
+//                            break;
+//                        }
+//                    }
+//
+//                    if (!isFinded) {
+//                        this.room = new Room(this);
+//                        userDAO.updateToPlaying(this.user.getID());
+//                        System.out.println("Không tìm thấy phòng, tạo phòng mới");
+//                    }
+//                }
                 //Xử lý không tìm được phòng
                 if (messageSplit[0].equals("cancel-room")) {
                     userDAO.updateToNotPlaying(this.user.getID());
