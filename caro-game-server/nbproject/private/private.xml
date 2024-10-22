@@ -3,13 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/dao/UserDAO.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/controller/ServerThreadBus.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/dao/DAO.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/model/User.java</file>
+            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/dao/DAO.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/controller/Server.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/controller/ServerThread.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-server/src/controller/Room.java</file>
         </group>
     </open-files>
 </project-private>

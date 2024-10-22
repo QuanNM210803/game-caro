@@ -96,7 +96,9 @@ public class HomePageFrm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        frameLabel.setBackground(new java.awt.Color(0, 0, 0));
         frameLabel.setFont(new java.awt.Font("Tekton Pro Ext", 0, 24)); // NOI18N
+        frameLabel.setForeground(new java.awt.Color(0, 0, 255));
         frameLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         frameLabel.setText("Game Caro ");
 
@@ -122,8 +124,8 @@ public class HomePageFrm extends javax.swing.JFrame {
         });
 
         jPanel1.setBackground(new java.awt.Color(102, 102, 102));
+        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("NickName");
         jLabel1.addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
@@ -144,7 +146,7 @@ public class HomePageFrm extends javax.swing.JFrame {
         numberOfWinValue.setForeground(new java.awt.Color(255, 255, 255));
         numberOfWinValue.setText("{day la so van thang}");
 
-        jLabel8.setBackground(new java.awt.Color(204, 204, 204));
+        jLabel8.setBackground(new java.awt.Color(0, 255, 204));
 
         numberOfGameValue.setForeground(new java.awt.Color(255, 255, 255));
         numberOfGameValue.setText("{day la so van da choi}");
@@ -216,9 +218,9 @@ public class HomePageFrm extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
