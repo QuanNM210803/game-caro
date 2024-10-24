@@ -169,14 +169,7 @@ public class SocketHandle implements Runnable {
                     int isStart = Integer.parseInt(messageSplit[3]);
 
                     User competitor = getUserFromString(4, messageSplit);
-                    if (Client.findRoomFrm != null) {
-                        Client.findRoomFrm.showFoundRoom();
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException ex) {
-                            JOptionPane.showMessageDialog(Client.findRoomFrm, "Lỗi khi sleep thread");
-                        }
-                    } else if (Client.waitingRoomFrm != null) {
+                    if (Client.waitingRoomFrm != null) {
                         Client.waitingRoomFrm.showFoundCompetitor();
                         try {
                             Thread.sleep(3000);
