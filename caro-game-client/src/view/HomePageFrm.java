@@ -40,7 +40,7 @@ public class HomePageFrm extends javax.swing.JFrame {
             winRatioValue.setText(String.format("%.2f", (float) Client.user.getNumberOfWin() / Client.user.getNumberOfGame() * 100) + "%");
         }
         drawValue.setText("" + Client.user.getNumberOfDraw());
-        markValue.setText("" + (Client.user.getNumberOfGame() + Client.user.getNumberOfWin() * 10));
+        markValue.setText("" + (Client.user.getNumberOfDraw() + Client.user.getNumberOfWin() * 3));
         rankValue.setText("" + Client.user.getRank());
     }
 
