@@ -113,7 +113,7 @@ public class ServerThread implements Runnable {
                     User user1 = userDAO.verifyUser(new User(messageSplit[1], messageSplit[2]));
                     if (user1 == null)
                         write("wrong-user," + messageSplit[1] + "," + messageSplit[2]);
-                    else if (!user1.getIsOnline() && !userDAO.checkIsBanned(user1)) {
+                    else if (!user1.getIsOnline()) {
                         write("login-success," + getStringFromUser(user1));
                         this.user = user1;
                         userDAO.updateToOnline(this.user.getID());

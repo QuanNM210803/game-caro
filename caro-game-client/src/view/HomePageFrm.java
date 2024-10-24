@@ -406,6 +406,11 @@ public class HomePageFrm extends javax.swing.JFrame {
     }//GEN-LAST:event_scoreBotButtonActionPerformed
 
     private void exitGameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitGameButtonActionPerformed
+        try {
+            Client.socketHandle.write("offline," + Client.user.getID());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+        }
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_exitGameButtonActionPerformed
 
