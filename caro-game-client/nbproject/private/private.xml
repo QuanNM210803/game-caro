@@ -3,11 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/model/User.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/JoinRoomPasswordFrm.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/HomePageFrm.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/controller/Client.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/controller/SocketHandle.java</file>
+            <file>file:/C:/Dh/nam4/LTM/game-caro/caro-game-client/src/model/Point.java</file>
+            <file>file:/C:/Dh/nam4/LTM/game-caro/caro-game-client/src/controller/SocketHandle.java</file>
+            <file>file:/C:/Dh/nam4/LTM/game-caro/caro-game-client/src/view/RankFrm.java</file>
+            <file>file:/C:/Dh/nam4/LTM/game-caro/caro-game-client/src/controller/Client.java</file>
+            <file>file:/C:/Dh/nam4/LTM/game-caro/caro-game-client/src/view/CompetitorInfoFrm.java</file>
         </group>
     </open-files>
 </project-private>

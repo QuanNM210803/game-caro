@@ -200,29 +200,29 @@ public class FriendListFrm extends javax.swing.JFrame {
     }//GEN-LAST:event_closeButtonActionPerformed
 
     private void friendTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_friendTableMouseClicked
-        try {
-            if (friendTable.getSelectedRow() == -1) return;
-            User friend = listFriend.get(friendTable.getSelectedRow());
-            if (!friend.isOnline()) {
-                throw new Exception("Người chơi không online");
-            }
-            if (friend.isPlaying()) {
-                throw new Exception("Người chơi đang trong trận đấu");
-            }
-            isClicked = true;
-            int res = JOptionPane.showConfirmDialog(rootPane, "Bạn có muốn thách đấu người bạn này không", "Xác nhận thách đầu", JOptionPane.YES_NO_OPTION);
-            if (res == JOptionPane.YES_OPTION) {
-                Client.closeAllViews();
-                Client.openView(Client.View.GAME_NOTICE, "Thách đấu", "Đang chờ phản hồi từ đối thủ");
-                Client.socketHandle.write("duel-request," + friend.getID());
-            } else {
-                isClicked = false;
-                startThread();
-            }
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-        }
+//        try {
+//            if (friendTable.getSelectedRow() == -1) return;
+//            User friend = listFriend.get(friendTable.getSelectedRow());
+//            if (!friend.isOnline()) {
+//                throw new Exception("Người chơi không online");
+//            }
+//            if (friend.isPlaying()) {
+//                throw new Exception("Người chơi đang trong trận đấu");
+//            }
+//            isClicked = true;
+//            int res = JOptionPane.showConfirmDialog(rootPane, "Bạn có muốn thách đấu người bạn này không", "Xác nhận thách đầu", JOptionPane.YES_NO_OPTION);
+//            if (res == JOptionPane.YES_OPTION) {
+//                Client.closeAllViews();
+//                Client.openView(Client.View.GAME_NOTICE, "Thách đấu", "Đang chờ phản hồi từ đối thủ");
+//                Client.socketHandle.write("duel-request," + friend.getID());
+//            } else {
+//                isClicked = false;
+//                startThread();
+//            }
+//
+//        } catch (Exception ex) {
+//            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+//        }
     }//GEN-LAST:event_friendTableMouseClicked
 
 
