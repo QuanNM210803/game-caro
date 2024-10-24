@@ -93,11 +93,11 @@ public class GameClientFrm extends javax.swing.JFrame {
         playerNicknameValue.setText(Client.user.getNickname());
         playerNumberOfGameValue.setText(Integer.toString(Client.user.getNumberOfGame()));
         playerNumberOfWinValue.setText(Integer.toString(Client.user.getNumberOfWin()));
-        playerButtonImage.setIcon(new ImageIcon("assets/game/" + Client.user.getAvatar() + ".jpg"));
+        playerButtonImage.setIcon(new ImageIcon("assets/avatar/" + Client.user.getAvatar() + ".jpg"));
         competitorNicknameValue.setText(competitor.getNickname());
         competotorNumberOfGameValue.setText(Integer.toString(competitor.getNumberOfGame()));
         competitorNumberOfWinValue.setText(Integer.toString(competitor.getNumberOfWin()));
-        competotorButtonImage.setIcon(new ImageIcon("assets/game/" + competitor.getAvatar() + ".jpg"));
+        competotorButtonImage.setIcon(new ImageIcon("assets/avatar/" + competitor.getAvatar() + ".jpg"));
         competotorButtonImage.setToolTipText("Xem thông tin đối thủ");
         playerCurrentPositionLabel.setVisible(false);
         competitorPositionLabel.setVisible(false);
