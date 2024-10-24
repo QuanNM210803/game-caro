@@ -87,6 +87,7 @@ public class ServerThread implements Runnable {
         room.getCompetitor(this.clientNumber).write("go-to-room," + room.getId() + "," + this.clientIP + ",0," + getStringFromUser(user));
     }
 
+    //dat isStart cua minh la 0, cua doi thu(nguoi tao phong) la 1
     public void goToPartnerRoom() throws IOException {
         write("go-to-room," + room.getId() + "," + room.getCompetitor(this.getClientNumber()).getClientIP() + ",0," + getStringFromUser(room.getCompetitor(this.getClientNumber()).getUser()));
         room.getCompetitor(this.clientNumber).write("go-to-room," + room.getId() + "," + this.clientIP + ",1," + getStringFromUser(user));
@@ -113,7 +114,7 @@ public class ServerThread implements Runnable {
                     User user1 = userDAO.verifyUser(new User(messageSplit[1], messageSplit[2]));
                     if (user1 == null)
                         write("wrong-user," + messageSplit[1] + "," + messageSplit[2]);
-                    else if (!user1.getIsOnline() && !userDAO.checkIsBanned(user1)) {
+                    else if (!user1.getIsOnline()) {
                         write("login-success," + getStringFromUser(user1));
                         this.user = user1;
                         userDAO.updateToOnline(this.user.getID());
@@ -139,7 +140,6 @@ public class ServerThread implements Runnable {
                 //Xử lý người chơi đăng xuất
                 if (messageSplit[0].equals("offline")) {
                     userDAO.updateToOffline(this.user.getID());
-        
                     Server.serverThreadBus.boardCast(clientNumber, "chat-server," + this.user.getNickname() + " đã offline");
                     this.user = null;
                 }
@@ -156,7 +156,6 @@ public class ServerThread implements Runnable {
                 //Xử lý chat toàn server
                 if (messageSplit[0].equals("chat-server")) {
                     Server.serverThreadBus.boardCast(clientNumber, messageSplit[0] + "," + user.getNickname() + " : " + messageSplit[1]);
-                   
                 }
                 //Xử lý vào phòng trong chức năng tìm kiếm phòng
                 if (messageSplit[0].equals("go-to-room")) {
@@ -329,7 +328,6 @@ public class ServerThread implements Runnable {
                 userDAO.updateToOffline(this.user.getID());
                 userDAO.updateToNotPlaying(this.user.getID());
                 Server.serverThreadBus.boardCast(clientNumber, "chat-server," + this.user.getNickname() + " đã offline");
- 
             }
 
             //remove thread khỏi bus

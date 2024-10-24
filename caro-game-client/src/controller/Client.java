@@ -235,7 +235,6 @@ public class Client {
         RANK,
         GAME_NOTICE,
         FRIEND_REQUEST,
-        GAME_AI,
         ROOM_NAME_FRM
     }
 }
