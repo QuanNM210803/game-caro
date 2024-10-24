@@ -42,7 +42,7 @@ public class GameClientFrm extends javax.swing.JFrame {
     private final String[] iconItem;
     private final String[] preItem;
 
-    private JButton preButton;
+    private JButton preButton; // luu nuoc di trc no
     private int userWin;
     private int competitorWin;
     private final String competitorIP;
@@ -186,6 +186,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         }
     }
 
+    // am thanh doi thu
     public void playSound1() {
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("assets/sound/1click.wav").getAbsoluteFile());
@@ -412,6 +413,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         }
     }
 
+    // check thua cho doi thu
+    // check thua hang
     public int checkRow() {
         int win = 0, hang = 0;
         boolean check = false;
@@ -424,7 +427,7 @@ public class GameClientFrm extends javax.swing.JFrame {
                         list.add(button[i][j]);
                         if (hang > 4) {
                             for (JButton jButton : list) {
-                                button[i][j].setDisabledIcon(new ImageIcon(winItem[numberOfMatch % 2]));
+                                jButton.setDisabledIcon(new ImageIcon(winItem[numberOfMatch % 2]));
                             }
                             win = 1;
                             break;
@@ -451,6 +454,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    //check thua cot
     public int checkColumn() {
         int win = 0, cot = 0;
         boolean check = false;
@@ -490,6 +494,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // nếu gặp 1 thì duyệt hất lên trên
     public int checkRightCross() {
         int win = 0, cheop = 0, n = 0;
         boolean check = false;
@@ -531,6 +536,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // nếu gặp 1 thì duyệt hất lên trên
     public int checkLeftCross() {
         int win = 0, cheot = 0, n = 0;
         boolean check = false;
@@ -573,6 +579,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // check win cua minh
+    // duyet hang
     public int checkRowWin() {
         int win = 0, hang = 0;
         boolean check = false;
@@ -612,6 +620,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    //duyet cot
     public int checkColumnWin() {
         int win = 0, cot = 0;
         boolean check = false;
@@ -650,6 +659,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // nếu gặp 1 thì duyệt hất lên trên
     public int checkRightCrossWin() {
         int win = 0, cheop = 0, n = 0;
         boolean check = false;
@@ -691,6 +701,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // nếu gặp 1 thì duyệt hất lên trên
     public int checkLeftCrossWin() {
         int win = 0, cheot = 0, n = 0;
         boolean check = false;
@@ -733,6 +744,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         return win;
     }
 
+    // khi minh danh nuoc di thi ben doi thu se xu ly cai nay
     public void caro(String x, String y) {
         int xx, yy;
         xx = Integer.parseInt(x);
