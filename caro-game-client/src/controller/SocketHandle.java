@@ -99,12 +99,6 @@ public class SocketHandle implements Runnable {
                     Client.openView(Client.View.LOGIN, messageSplit[1], messageSplit[2]);
                     Client.loginFrm.showError("Tài khoản đã đăng nhập ở nơi khác");
                 }
-                //Tài khoản đã bị banned
-//                if (messageSplit[0].equals("banned-user")) {
-//                    Client.closeView(Client.View.GAME_NOTICE);
-//                    Client.openView(Client.View.LOGIN, messageSplit[1], messageSplit[2]);
-//                    Client.loginFrm.showError("Tài khoản đã bị ban");
-//                }
                 //Xử lý register trùng tên
                 if (messageSplit[0].equals("duplicate-username")) {
                     Client.closeAllViews();
