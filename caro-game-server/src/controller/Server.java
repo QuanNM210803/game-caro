@@ -5,6 +5,7 @@
  */
 package controller;
 
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,7 +21,6 @@ public class Server {
     public static volatile ServerThreadBus serverThreadBus;
     public static Socket socketOfServer;
     public static int ROOM_ID;
-
     public static void main(String[] args) {
         ServerSocket listener = null;
         serverThreadBus = new ServerThreadBus();

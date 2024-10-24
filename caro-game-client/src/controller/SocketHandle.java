@@ -99,12 +99,6 @@ public class SocketHandle implements Runnable {
                     Client.openView(Client.View.LOGIN, messageSplit[1], messageSplit[2]);
                     Client.loginFrm.showError("Tài khoản đã đăng nhập ở nơi khác");
                 }
-                //Tài khoản đã bị banned
-                if (messageSplit[0].equals("banned-user")) {
-                    Client.closeView(Client.View.GAME_NOTICE);
-                    Client.openView(Client.View.LOGIN, messageSplit[1], messageSplit[2]);
-                    Client.loginFrm.showError("Tài khoản đã bị ban");
-                }
                 //Xử lý register trùng tên
                 if (messageSplit[0].equals("duplicate-username")) {
                     Client.closeAllViews();
@@ -171,14 +165,7 @@ public class SocketHandle implements Runnable {
                     int isStart = Integer.parseInt(messageSplit[3]);
 
                     User competitor = getUserFromString(4, messageSplit);
-                    if (Client.findRoomFrm != null) {
-                        Client.findRoomFrm.showFoundRoom();
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException ex) {
-                            JOptionPane.showMessageDialog(Client.findRoomFrm, "Lỗi khi sleep thread");
-                        }
-                    } else if (Client.waitingRoomFrm != null) {
+                    if (Client.waitingRoomFrm != null) {
                         Client.waitingRoomFrm.showFoundCompetitor();
                         try {
                             Thread.sleep(3000);

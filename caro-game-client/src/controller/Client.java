@@ -17,7 +17,6 @@ public class Client {
     public static HomePageFrm homePageFrm;
     public static RoomListFrm roomListFrm;
     public static FriendListFrm friendListFrm;
-    public static FindRoomFrm findRoomFrm;
     public static WaitingRoomFrm waitingRoomFrm;
     public static GameClientFrm gameClientFrm;
     public static CreateRoomPasswordFrm createRoomPasswordFrm;
@@ -72,10 +71,6 @@ public class Client {
                 case FRIEND_LIST:
                     friendListFrm = new FriendListFrm();
                     friendListFrm.setVisible(true);
-                    break;
-                case FIND_ROOM:
-                    findRoomFrm = new FindRoomFrm();
-                    findRoomFrm.setVisible(true);
                     break;
                 case WAITING_ROOM:
                     waitingRoomFrm = new WaitingRoomFrm();
@@ -158,10 +153,6 @@ public class Client {
                     friendListFrm.stopAllThread();
                     friendListFrm.dispose();
                     break;
-                case FIND_ROOM:
-                    findRoomFrm.stopAllThread();
-                    findRoomFrm.dispose();
-                    break;
                 case WAITING_ROOM:
                     waitingRoomFrm.dispose();
                     break;
@@ -204,10 +195,6 @@ public class Client {
             friendListFrm.stopAllThread();
             friendListFrm.dispose();
         }
-        if (findRoomFrm != null) {
-            findRoomFrm.stopAllThread();
-            findRoomFrm.dispose();
-        }
         if (waitingRoomFrm != null) waitingRoomFrm.dispose();
         if (gameClientFrm != null) {
             gameClientFrm.stopAllThread();
@@ -240,7 +227,6 @@ public class Client {
         HOMEPAGE,
         ROOM_LIST,
         FRIEND_LIST,
-        FIND_ROOM,
         WAITING_ROOM,
         GAME_CLIENT,
         CREATE_ROOM_PASSWORD,

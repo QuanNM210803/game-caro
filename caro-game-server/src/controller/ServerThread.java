@@ -114,16 +114,15 @@ public class ServerThread implements Runnable {
                     User user1 = userDAO.verifyUser(new User(messageSplit[1], messageSplit[2]));
                     if (user1 == null)
                         write("wrong-user," + messageSplit[1] + "," + messageSplit[2]);
-                    else if (!user1.getIsOnline() && !userDAO.checkIsBanned(user1)) {
+                    else if (!user1.getIsOnline()) {
                         write("login-success," + getStringFromUser(user1));
                         this.user = user1;
                         userDAO.updateToOnline(this.user.getID());
                         Server.serverThreadBus.boardCast(clientNumber, "chat-server," + user1.getNickname() + " đang online");
-                    } else if (!userDAO.checkIsBanned(user1)) {
+                    
+                    } else if (user1.getIsOnline()) {
                         write("dupplicate-login," + messageSplit[1] + "," + messageSplit[2]);
-                    } else {
-                        write("banned-user," + messageSplit[1] + "," + messageSplit[2]);
-                    }
+                    } 
                 }
                 //Xử lý đăng kí
                 if (messageSplit[0].equals("register")) {
@@ -228,7 +227,6 @@ public class ServerThread implements Runnable {
                     res += (userDAO.checkIsFriend(this.user.getID(), Integer.parseInt(messageSplit[1])) ? 1 : 0);
                     write(res);
                 }
-                //Xử lý không tìm được phòng
                 if (messageSplit[0].equals("cancel-room")) {
                     userDAO.updateToNotPlaying(this.user.getID());
                     System.out.println("Đã hủy phòng");
