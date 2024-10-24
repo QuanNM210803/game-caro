@@ -23,7 +23,7 @@ public class WaitingRoomFrm extends javax.swing.JFrame {
      */
     public WaitingRoomFrm() {
         initComponents();
-        this.setTitle("Caro Game by Ju");
+        this.setTitle("Caro Game Nhóm 5");
         isOpenning = false;
         this.setIconImage(new ImageIcon("assets/image/caroicon.png").getImage());
         this.setResizable(false);
