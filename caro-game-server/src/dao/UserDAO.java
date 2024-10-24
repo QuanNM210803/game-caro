@@ -84,37 +84,7 @@ public class UserDAO extends DAO {
         return false;
     }
 
-    public boolean checkIsBanned(User user) {
-        try {
-            PreparedStatement preparedStatement = con.prepareStatement("SELECT * FROM banned_user WHERE ID_User = ?");
-            preparedStatement.setInt(1, user.getID());
-            System.out.println(preparedStatement);
-            ResultSet rs = preparedStatement.executeQuery();
-            if (rs.next()) {
-                return true;
-            }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public void updateBannedStatus(User user, boolean ban) {
-        try {
-            PreparedStatement preparedStatement1 = con.prepareStatement("INSERT INTO `banned_user`(`ID_User`) VALUES (?)");
-            PreparedStatement preparedStatement2 = con.prepareStatement("DELETE FROM `banned_user` WHERE ID_User=?");
-            if (ban) {
-                preparedStatement1.setInt(1, user.getID());
-                preparedStatement1.executeUpdate();
-            } else {
-                preparedStatement2.setInt(1, user.getID());
-                preparedStatement2.executeUpdate();
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
 
     public void updateToOnline(int ID) {
         try {
