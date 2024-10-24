@@ -1,6 +1,5 @@
 package view;
 
-
 import controller.Client;
 
 import java.awt.Color;
@@ -10,40 +9,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.Timer;
 import java.util.ArrayList;
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.TargetDataLine;
 import javax.swing.JOptionPane;
 
 import model.User;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * @author Admin
- */
 public class GameClientFrm extends javax.swing.JFrame {
 
     private final User competitor;
@@ -53,7 +32,7 @@ public class GameClientFrm extends javax.swing.JFrame {
     private final int[][] userMatrix;
 
     //if changing it you will need to redesign icon
-    private final int size = 15;
+    private final int SIZE = 15;
     private final Timer timer;
     private Integer second;
     private Integer minute;
@@ -66,25 +45,19 @@ public class GameClientFrm extends javax.swing.JFrame {
     private JButton preButton;
     private int userWin;
     private int competitorWin;
-    private boolean isSending;
-    private boolean isListening;
     private final String competitorIP;
 
     public GameClientFrm(User competitor, int room_ID, int isStart, String competitorIP) {
         initComponents();
-        numberOfMatch = isStart;
+        this.numberOfMatch = isStart;
         this.competitor = competitor;
         this.competitorIP = competitorIP;
-
-        isSending = false;
-        isListening = false;
-        microphoneStatusButton.setIcon(new ImageIcon("assets/game/mute.png"));
-        speakerStatusButton.setIcon(new ImageIcon("assets/game/mutespeaker.png"));
 
         //init score
         userWin = 0;
         competitorWin = 0;
 
+        //set thong tin title
         this.setTitle("Caro Game Nhóm 5");
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setResizable(false);
@@ -94,37 +67,33 @@ public class GameClientFrm extends javax.swing.JFrame {
         this.getContentPane().setLayout(null);
 
         //Set layout dạng lưới cho panel chứa button
-        gamePanel.setLayout(new GridLayout(size, size));
+        gamePanel.setLayout(new GridLayout(SIZE, SIZE));
 
         //Setup play button
-        button = new JButton[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        button = new JButton[SIZE][SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 button[i][j] = new JButton("");
                 button[i][j].setBackground(Color.white);
-                button[i][j].setDisabledIcon(new ImageIcon("assets/image/border.jpg"));
+                //button[i][j].setDisabledIcon(new ImageIcon("assets/image/border.jpg"));
                 gamePanel.add(button[i][j]);
             }
         }
 
         //SetUp play Matrix
-        competitorMatrix = new int[size][size];
-        matrix = new int[size][size];
-        userMatrix = new int[size][size];
+        competitorMatrix = new int[SIZE][SIZE];
+        matrix = new int[SIZE][SIZE];
+        userMatrix = new int[SIZE][SIZE];
 
         //Setup UI
         playerLabel.setFont(new Font("Arial", Font.BOLD, 15));
         competitorLabel.setFont(new Font("Arial", Font.BOLD, 15));
-        roomNameLabel.setFont(new Font("Arial", Font.BOLD, 15));
-        roomNameLabel.setAlignmentX(JLabel.CENTER);
         sendButton.setBackground(Color.white);
         sendButton.setIcon(new ImageIcon("assets/image/send2.png"));
         playerNicknameValue.setText(Client.user.getNickname());
         playerNumberOfGameValue.setText(Integer.toString(Client.user.getNumberOfGame()));
         playerNumberOfWinValue.setText(Integer.toString(Client.user.getNumberOfWin()));
         playerButtonImage.setIcon(new ImageIcon("assets/game/" + Client.user.getAvatar() + ".jpg"));
-        roomNameLabel.setText("Phòng: " + room_ID);
-        vsIcon.setIcon(new ImageIcon("assets/game/swords-1.png"));
         competitorNicknameValue.setText(competitor.getNickname());
         competotorNumberOfGameValue.setText(Integer.toString(competitor.getNumberOfGame()));
         competitorNumberOfWinValue.setText(Integer.toString(competitor.getNumberOfWin()));
@@ -132,14 +101,14 @@ public class GameClientFrm extends javax.swing.JFrame {
         competotorButtonImage.setToolTipText("Xem thông tin đối thủ");
         playerCurrentPositionLabel.setVisible(false);
         competitorPositionLabel.setVisible(false);
-        drawRequestButton.setVisible(false);
+        
         playerTurnLabel.setVisible(false);
         competitorTurnLabel.setVisible(false);
         countDownLabel.setVisible(false);
         messageTextArea.setEditable(false);
         scoreLabel.setText("Tỉ số: 0-0");
 
-        //Setup timer
+        //Setup timer, 1s chạy 1 lần
         second = 60;
         minute = 0;
         timer = new Timer(1000, new ActionListener() {
@@ -174,7 +143,7 @@ public class GameClientFrm extends javax.swing.JFrame {
 
         });
 
-        //Setup icon
+        //Setup icon cho X-O
         normalItem = new String[2];
         normalItem[1] = "assets/image/o2.jpg";
         normalItem[0] = "assets/image/x2.jpg";
@@ -199,661 +168,12 @@ public class GameClientFrm extends javax.swing.JFrame {
 
     }
 
-    public void exitGame() {
-        try {
-            timer.stop();
-            voiceCloseMic();
-            voiceStopListening();
-            Client.socketHandle.write("left-room,");
-            Client.closeAllViews();
-            Client.openView(Client.View.HOMEPAGE);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-        }
-        Client.closeAllViews();
-        Client.openView(Client.View.HOMEPAGE);
-    }
-
-    public void stopAllThread() {
-        timer.stop();
-        voiceCloseMic();
-        voiceStopListening();
-    }
-
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jFrame1 = new javax.swing.JFrame();
-        jFrame2 = new javax.swing.JFrame();
-        jFrame3 = new javax.swing.JFrame();
-        jFrame4 = new javax.swing.JFrame();
-        playerNumberOfWinLabel = new javax.swing.JLabel();
-        playerTurnLabel = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        playerNicknameLabel = new javax.swing.JLabel();
-        playerNumberOfGameLabel = new javax.swing.JLabel();
-        competitorNumberOfWinLabel = new javax.swing.JLabel();
-        competitorNicknameLabel = new javax.swing.JLabel();
-        competotorNumberOfGameLabel = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        messageTextArea = new javax.swing.JTextArea();
-        messageTextField = new javax.swing.JTextField();
-        playerNicknameValue = new javax.swing.JLabel();
-        playerNumberOfGameValue = new javax.swing.JLabel();
-        playerNumberOfWinValue = new javax.swing.JLabel();
-        competitorNicknameValue = new javax.swing.JLabel();
-        competotorNumberOfGameValue = new javax.swing.JLabel();
-        competitorNumberOfWinValue = new javax.swing.JLabel();
-        countDownLabel = new javax.swing.JLabel();
-        gamePanel = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        playerLabel = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        competitorLabel = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
-        roomNameLabel = new javax.swing.JLabel();
-        microphoneStatusButton = new javax.swing.JButton();
-        speakerStatusButton = new javax.swing.JButton();
-        scoreLabel = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
-        drawRequestButton = new javax.swing.JButton();
-        sendButton = new javax.swing.JButton();
-        competitorTurnLabel = new javax.swing.JLabel();
-        playerCurrentPositionLabel = new javax.swing.JLabel();
-        competitorPositionLabel = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        playerButtonImage = new javax.swing.JLabel();
-        vsIcon = new javax.swing.JLabel();
-        competotorButtonImage = new javax.swing.JButton();
-        jProgressBar1 = new javax.swing.JProgressBar();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        mainMenu = new javax.swing.JMenu();
-        newGameMenuItem = new javax.swing.JMenuItem();
-        exitMenuItem = new javax.swing.JMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        helpMenuItem = new javax.swing.JMenuItem();
-
-        javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
-        jFrame1.getContentPane().setLayout(jFrame1Layout);
-        jFrame1Layout.setHorizontalGroup(
-            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        jFrame1Layout.setVerticalGroup(
-            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout jFrame2Layout = new javax.swing.GroupLayout(jFrame2.getContentPane());
-        jFrame2.getContentPane().setLayout(jFrame2Layout);
-        jFrame2Layout.setHorizontalGroup(
-            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        jFrame2Layout.setVerticalGroup(
-            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout jFrame3Layout = new javax.swing.GroupLayout(jFrame3.getContentPane());
-        jFrame3.getContentPane().setLayout(jFrame3Layout);
-        jFrame3Layout.setHorizontalGroup(
-            jFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        jFrame3Layout.setVerticalGroup(
-            jFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout jFrame4Layout = new javax.swing.GroupLayout(jFrame4.getContentPane());
-        jFrame4.getContentPane().setLayout(jFrame4Layout);
-        jFrame4Layout.setHorizontalGroup(
-            jFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        jFrame4Layout.setVerticalGroup(
-            jFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setAutoRequestFocus(false);
-
-        playerNumberOfWinLabel.setText("Số ván thắng");
-
-        playerTurnLabel.setForeground(new java.awt.Color(255, 0, 0));
-        playerTurnLabel.setText("Đến lượt bạn");
-
-        playerNicknameLabel.setText("Nickname");
-
-        playerNumberOfGameLabel.setText("Số ván chơi");
-
-        competitorNumberOfWinLabel.setText("Số ván thắng");
-
-        competitorNicknameLabel.setText("Nickname");
-
-        competotorNumberOfGameLabel.setText("Số ván chơi");
-
-        messageTextArea.setColumns(20);
-        messageTextArea.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        messageTextArea.setRows(5);
-        jScrollPane1.setViewportView(messageTextArea);
-
-        messageTextField.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        messageTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                messageTextFieldKeyPressed(evt);
-            }
-        });
-
-        playerNicknameValue.setText("{nickname}");
-
-        playerNumberOfGameValue.setText("{sovanchoi}");
-
-        playerNumberOfWinValue.setText("{sovanthang}");
-
-        competitorNicknameValue.setText("{nickname}");
-
-        competotorNumberOfGameValue.setText("{sovanchoi}");
-
-        competitorNumberOfWinValue.setText("{sovanthang}");
-
-        countDownLabel.setForeground(new java.awt.Color(255, 0, 0));
-        countDownLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        countDownLabel.setText("Thời gian:00:20");
-
-        gamePanel.setBackground(new java.awt.Color(102, 102, 102));
-
-        javax.swing.GroupLayout gamePanelLayout = new javax.swing.GroupLayout(gamePanel);
-        gamePanel.setLayout(gamePanelLayout);
-        gamePanelLayout.setHorizontalGroup(
-            gamePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 568, Short.MAX_VALUE)
-        );
-        gamePanelLayout.setVerticalGroup(
-            gamePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 666, Short.MAX_VALUE)
-        );
-
-        jPanel2.setBackground(new java.awt.Color(102, 102, 102));
-
-        playerLabel.setForeground(new java.awt.Color(255, 255, 255));
-        playerLabel.setText("Bạn");
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(playerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(playerLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel3.setBackground(new java.awt.Color(102, 102, 102));
-        jPanel3.setForeground(new java.awt.Color(102, 102, 102));
-
-        competitorLabel.setForeground(new java.awt.Color(255, 255, 255));
-        competitorLabel.setText("Đối thủ");
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(competitorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(173, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(competitorLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-
-        jPanel4.setBackground(new java.awt.Color(102, 102, 102));
-
-        roomNameLabel.setForeground(new java.awt.Color(255, 255, 255));
-        roomNameLabel.setText("{Tên Phòng}");
-
-        microphoneStatusButton.setToolTipText("Bật mic để nói chuyện cùng nhau");
-        microphoneStatusButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                microphoneStatusButtonActionPerformed(evt);
-            }
-        });
-
-        speakerStatusButton.setToolTipText("Âm thanh trò chuyện đang tắt");
-        speakerStatusButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                speakerStatusButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(roomNameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(microphoneStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(39, 39, 39)
-                .addComponent(speakerStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(roomNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(microphoneStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(speakerStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        scoreLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        scoreLabel.setText("Tỉ số:  0-0");
-
-        jPanel5.setBackground(new java.awt.Color(102, 102, 102));
-
-        drawRequestButton.setBackground(new java.awt.Color(102, 102, 102));
-        drawRequestButton.setForeground(new java.awt.Color(255, 255, 255));
-        drawRequestButton.setText("Cầu hòa");
-        drawRequestButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                drawRequestButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(131, 131, 131)
-                .addComponent(drawRequestButton, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(144, Short.MAX_VALUE))
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(drawRequestButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
-        );
-
-        sendButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sendButtonActionPerformed(evt);
-            }
-        });
-
-        competitorTurnLabel.setForeground(new java.awt.Color(0, 0, 204));
-        competitorTurnLabel.setText("Đến lượt đối thủ");
-
-        playerCurrentPositionLabel.setText("x/o");
-
-        competitorPositionLabel.setText("x/o");
-
-        jPanel6.setBackground(new java.awt.Color(102, 102, 102));
-
-        playerButtonImage.setBackground(new java.awt.Color(102, 102, 102));
-
-        competotorButtonImage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                competotorButtonImageActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(vsIcon, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
-                        .addComponent(playerButtonImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(competotorButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(13, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(playerButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(vsIcon, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(competotorButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 12, Short.MAX_VALUE))
-        );
-
-        mainMenu.setText("Menu");
-        mainMenu.setToolTipText("");
-
-        newGameMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        newGameMenuItem.setText("Game mới");
-        newGameMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                newGameMenuItemActionPerformed(evt);
-            }
-        });
-        mainMenu.add(newGameMenuItem);
-
-        exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
-        exitMenuItem.setText("Thoát");
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitMenuItemActionPerformed(evt);
-            }
-        });
-        mainMenu.add(exitMenuItem);
-
-        jMenuBar1.add(mainMenu);
-
-        helpMenu.setText("Help");
-
-        helpMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, java.awt.event.InputEvent.CTRL_DOWN_MASK));
-        helpMenuItem.setText("Trợ giúp");
-        helpMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                helpMenuItemActionPerformed(evt);
-            }
-        });
-        helpMenu.add(helpMenuItem);
-
-        jMenuBar1.add(helpMenu);
-
-        setJMenuBar(jMenuBar1);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(playerNumberOfWinLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(26, 26, 26)
-                                                .addComponent(playerNumberOfWinValue, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(competitorNicknameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(39, 39, 39)
-                                                .addComponent(competitorNicknameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                    .addComponent(competotorNumberOfGameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(competitorNumberOfWinLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                                .addGap(27, 27, 27)
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                    .addComponent(competotorNumberOfGameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(competitorNumberOfWinValue, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(29, 29, 29)
-                                        .addComponent(playerCurrentPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(39, 39, 39)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(scoreLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(41, 41, 41)
-                                                .addComponent(competitorPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(playerNumberOfGameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(playerNicknameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(26, 26, 26)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(playerNicknameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(playerNumberOfGameValue)))
-                                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(messageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(playerTurnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(28, 28, 28)
-                                        .addComponent(countDownLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(28, 28, 28)
-                                        .addComponent(competitorTurnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)))
-                .addComponent(gamePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(playerNicknameLabel)
-                            .addComponent(playerNicknameValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(playerNumberOfGameLabel)
-                            .addComponent(playerNumberOfGameValue))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(playerNumberOfWinLabel)
-                            .addComponent(playerNumberOfWinValue))
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(competitorNicknameLabel)
-                            .addComponent(competitorNicknameValue))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(competotorNumberOfGameLabel)
-                            .addComponent(competotorNumberOfGameValue))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(competitorNumberOfWinLabel)
-                            .addComponent(competitorNumberOfWinValue))))
-                .addGap(18, 18, 18)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel7)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(5, 5, 5)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(competitorPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(scoreLabel)
-                            .addComponent(playerCurrentPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(countDownLabel)
-                    .addComponent(competitorTurnLabel)
-                    .addComponent(playerTurnLabel))
-                .addGap(6, 6, 6)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(messageTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
-                    .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addComponent(gamePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        //for(int i=0; i<5; i++){
-            //    for(int j=0;j<5;j++){
-                //        gamePanel.add(button[i][j]);
-                //    }
-            //}
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void newGameMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGameMenuItemActionPerformed
-        JOptionPane.showMessageDialog(rootPane, "Thông báo", "Tính năng đang được phát triển", JOptionPane.INFORMATION_MESSAGE);
-    }//GEN-LAST:event_newGameMenuItemActionPerformed
-
-    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        exitGame();
-    }//GEN-LAST:event_exitMenuItemActionPerformed
-
-    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        try {
-            if (messageTextField.getText().isEmpty()) {
-                throw new Exception("Vui lòng nhập nội dung tin nhắn");
-            }
-            String temp = messageTextArea.getText();
-            temp += "Tôi: " + messageTextField.getText() + "\n";
-            messageTextArea.setText(temp);
-            Client.socketHandle.write("chat," + messageTextField.getText());
-            messageTextField.setText("");
-            messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-        }
-    }//GEN-LAST:event_sendButtonActionPerformed
-
-    private void drawRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_drawRequestButtonActionPerformed
-
-        try {
-            int res = JOptionPane.showConfirmDialog(rootPane, "Bạn có thực sự muốn cầu hòa ván chơi này", "Yêu cầu cầu hòa", JOptionPane.YES_NO_OPTION);
-            if (res == JOptionPane.YES_OPTION) {
-                Client.socketHandle.write("draw-request,");
-                timer.stop();
-                setEnableButton(false);
-                Client.openView(Client.View.GAME_NOTICE, "Yêu cầu hòa", "Đang chờ phản hồi từ đối thủ");
-            }
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-        }
-    }//GEN-LAST:event_drawRequestButtonActionPerformed
-
-    private void helpMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpMenuItemActionPerformed
-        // TODO add your handling code here:
-        JOptionPane.showMessageDialog(rootPane, "Luật chơi: luật quốc tế 5 nước chặn 2 đầu\n"
-                + "Hai người chơi luân phiên nhau chơi trước\n"
-                + "Người chơi trước đánh X, người chơi sau đánh O\n"
-                + "Bạn có 20 giây cho mỗi lượt đánh, quá 20 giây bạn sẽ thua\n"
-                + "Khi cầu hòa, nếu đối thủ đồng ý thì ván hiện tại được hủy kết quả\n"
-                + "Với mỗi ván chơi bạn có thêm 1 điểm, nếu hòa bạn được thêm 5 điểm,\n"
-                + "nếu thắng bạn được thêm 10 điểm\n"
-                + "Chúc bạn chơi game vui vẻ");
-    }//GEN-LAST:event_helpMenuItemActionPerformed
-
-    private void competotorButtonImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_competotorButtonImageActionPerformed
-
-        Client.openView(Client.View.COMPETITOR_INFO, competitor);
-
-    }//GEN-LAST:event_competotorButtonImageActionPerformed
-
-    private void microphoneStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_microphoneStatusButtonActionPerformed
-        if (isSending) {
-            try {
-                Client.socketHandle.write("voice-message,close-mic");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, "Có lỗi xảy ra");
-            }
-            microphoneStatusButton.setIcon(new ImageIcon("assets/game/mute.png"));
-            voiceCloseMic();
-            microphoneStatusButton.setToolTipText("Mic đang tắt");
-
-        } else {
-            try {
-                Client.socketHandle.write("voice-message,open-mic");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, "Có lỗi xảy ra");
-            }
-            microphoneStatusButton.setIcon(new ImageIcon("assets/game/88634.png"));
-            voiceOpenMic();
-            microphoneStatusButton.setToolTipText("Mic đang bật");
-        }
-    }//GEN-LAST:event_microphoneStatusButtonActionPerformed
-
-    private void speakerStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_speakerStatusButtonActionPerformed
-        if (isListening) {
-            try {
-                Client.socketHandle.write("voice-message,close-speaker");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, "Có lỗi xảy ra");
-            }
-            speakerStatusButton.setIcon(new ImageIcon("assets/game/mutespeaker.png"));
-            voiceStopListening();
-            speakerStatusButton.setToolTipText("Âm thanh trò chuyện đang tắt");
-        } else {
-            try {
-                Client.socketHandle.write("voice-message,open-speaker");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, "Có lỗi xảy ra");
-            }
-            voiceListening();
-            speakerStatusButton.setIcon(new ImageIcon("assets/game/speaker.png"));
-            speakerStatusButton.setToolTipText("Âm thanh trò chuyện đang bật");
-        }
-    }//GEN-LAST:event_speakerStatusButtonActionPerformed
-
-    private void messageTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_messageTextFieldKeyPressed
-        if (evt.getKeyCode() == 10) {
-            try {
-                if (messageTextField.getText().isEmpty()) {
-                    return;
-                }
-                String temp = messageTextArea.getText();
-                temp += "Tôi: " + messageTextField.getText() + "\n";
-                messageTextArea.setText(temp);
-                Client.socketHandle.write("chat," + messageTextField.getText());
-                messageTextField.setText("");
-                messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-            }
-        }
-    }//GEN-LAST:event_messageTextFieldKeyPressed
-
+    // hiển thị JOptionPane theo mesage gửi vào
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(rootPane, message);
     }
 
+    // âm thanh khi mình bấm nước đi mới
     public void playSound() {
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("assets/sound/click.wav").getAbsoluteFile());
@@ -878,22 +198,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         }
     }
 
-    public void playSound2() {
-        try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("assets/sound/win.wav").getAbsoluteFile());
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
-        } catch (Exception ex) {
-            System.out.println("Error with playing sound.");
-            ex.printStackTrace();
-        }
-    }
-
-    public void stopTimer() {
-        timer.stop();
-    }
-
+    // lay not de hien thi X-O sao cho hop ly
     int not(int i) {
         if (i == 1) {
             return 0;
@@ -904,9 +209,10 @@ public class GameClientFrm extends javax.swing.JFrame {
         return 0;
     }
 
+    // xử lý khi đánh nước đi và hover button
     void setupButton() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 final int a = i, b = j;
 
                 button[a][b].addActionListener(new ActionListener() {
@@ -961,78 +267,77 @@ public class GameClientFrm extends javax.swing.JFrame {
             }
         }
     }
-
-    public void displayDrawRefuse() {
-        JOptionPane.showMessageDialog(rootPane, "Đối thủ không chấp nhận hòa, mời bạn chơi tiếp");
-        timer.start();
-        setEnableButton(true);
-    }
-
+    
+    //set các thuộc tính thông báo "đến lượt đối thủ" khi vừa vào game mới
     public void displayCompetitorTurn() {
         countDownLabel.setVisible(false);
         competitorTurnLabel.setVisible(true);
         competitorPositionLabel.setVisible(true);
         playerTurnLabel.setVisible(false);
-        drawRequestButton.setVisible(false);
         playerCurrentPositionLabel.setVisible(false);
     }
 
+    //set các thuộc tính thông báo "đến lượt bạn" khi vừa vào game mới
     public void displayUserTurn() {
         countDownLabel.setVisible(false);
         competitorTurnLabel.setVisible(false);
         competitorPositionLabel.setVisible(false);
         playerTurnLabel.setVisible(true);
-        drawRequestButton.setVisible(true);
         playerCurrentPositionLabel.setVisible(true);
     }
 
+    // bắt đầu hiển thị và đến thời giam khi chấp nhận game mới
     public void startTimer() {
         countDownLabel.setVisible(true);
         second = 60;
         minute = 0;
         timer.start();
     }
-
+    
+    // hiển thị message ở hộp thoại khi nhan tin va khi nhan dc tin nhan
     public void addMessage(String message) {
         String temp = messageTextArea.getText();
         temp += competitor.getNickname() + ": " + message + "\n";
         messageTextArea.setText(temp);
         messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
     }
-
+    
+    //được gọi khi đối thủ đánh nước cờ quyết định dẫn đến thắng game
     public void addCompetitorMove(String x, String y) {
         displayUserTurn();
         startTimer();
         setEnableButton(true);
         caro(x, y);
     }
-
-    public void setLose(String xx, String yy) {
-        caro(xx, yy);
+    
+    //dung bo dem thoi gian
+    public void stopTimer() {
+        timer.stop();
     }
-
+    
+    // neu minh win thi setup lai thong tin
     public void increaseWinMatchToUser() {
         Client.user.setNumberOfWin(Client.user.getNumberOfWin() + 1);
         playerNumberOfWinValue.setText("" + Client.user.getNumberOfWin());
         userWin++;
         scoreLabel.setText("Tỉ số: " + userWin + "-" + competitorWin);
-        String tmp = messageTextArea.getText();
-        tmp += "--Bạn đã thắng, tỉ số hiện tại là " + userWin + "-" + competitorWin + "--\n";
+        String tmp = messageTextArea.getText() + "--Bạn đã thắng, tỉ số hiện tại là " + userWin + "-" + competitorWin + "--\n";
         messageTextArea.setText(tmp);
         messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
     }
 
+    // neu doi thu win thi setup lai thong tin
     public void increaseWinMatchToCompetitor() {
         competitor.setNumberOfWin(competitor.getNumberOfWin() + 1);
         competitorNumberOfWinValue.setText("" + competitor.getNumberOfWin());
         competitorWin++;
         scoreLabel.setText("Tỉ số: " + userWin + "-" + competitorWin);
-        String tmp = messageTextArea.getText();
-        tmp += "--Bạn đã thua, tỉ số hiện tại là " + userWin + "-" + competitorWin + "--\n";
+        String tmp = messageTextArea.getText() + "--Bạn đã thua, tỉ số hiện tại là " + userWin + "-" + competitorWin + "--\n";
         messageTextArea.setText(tmp);
-        messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
+        messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength()); //dua tro chuot ve cuoi text area
     }
 
+    // hiển thị message ở hộp thoại khi van dau hoa
     public void displayDrawGame() {
         String tmp = messageTextArea.getText();
         tmp += "--Ván chơi hòa--\n";
@@ -1040,161 +345,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
     }
 
-    public void showDrawRequest() {
-        int res = JOptionPane.showConfirmDialog(rootPane, "Đối thử muốn cầu hóa ván này, bạn đồng ý chứ", "Yêu cầu cầu hòa", JOptionPane.YES_NO_OPTION);
-        if (res == JOptionPane.YES_OPTION) {
-            try {
-                timer.stop();
-                setEnableButton(false);
-                Client.socketHandle.write("draw-confirm,");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-            }
-        } else {
-            try {
-                Client.socketHandle.write("draw-refuse,");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
-            }
-        }
-    }
-
-    public void voiceOpenMic() {
-
-        Thread sendThread = new Thread() {
-
-            @Override
-            public void run() {
-                AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, true);
-                TargetDataLine microphone;
-                try {
-                    microphone = AudioSystem.getTargetDataLine(format);
-
-                    DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-                    microphone = (TargetDataLine) AudioSystem.getLine(info);
-                    microphone.open(format);
-
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    int numBytesRead;
-                    int CHUNK_SIZE = 1024;
-                    byte[] data = new byte[microphone.getBufferSize() / 5];
-                    microphone.start();
-
-                    DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
-
-                    int port = 5555;
-
-                    InetAddress address = InetAddress.getByName(competitorIP);
-                    DatagramSocket socket = new DatagramSocket();
-                    byte[] buffer = new byte[1024];
-                    isSending = true;
-                    while (isSending) {
-                        numBytesRead = microphone.read(data, 0, CHUNK_SIZE);
-                        out.write(data, 0, numBytesRead);
-                        DatagramPacket request = new DatagramPacket(data, numBytesRead, address, port);
-                        socket.send(request);
-
-                    }
-                    out.close();
-                    socket.close();
-                    microphone.close();
-                } catch (LineUnavailableException | IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        };
-        sendThread.start();
-
-    }
-
-    public void voiceCloseMic() {
-        isSending = false;
-    }
-
-
-    public void voiceListening() {
-        //                    microphone = AudioSystem.getTargetDataLine(format);
-        //                    DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-        //                    microphone = (TargetDataLine) AudioSystem.getLine(info);
-        //                    microphone.open(format);
-        //                    microphone.start();
-        Thread listenThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, true);
-                    SourceDataLine speakers;
-                    DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
-                    speakers = (SourceDataLine) AudioSystem.getLine(dataLineInfo);
-                    speakers.open(format);
-                    speakers.start();
-                    try {
-                        DatagramSocket serverSocket = new DatagramSocket(5555);
-                        isListening = true;
-                        while (isListening) {
-                            byte[] buffer = new byte[1024];
-                            DatagramPacket response = new DatagramPacket(buffer, buffer.length);
-                            serverSocket.receive(response);
-                            speakers.write(response.getData(), 0, response.getData().length);
-                            jProgressBar1.setValue((int) volumeRMS(response.getData()));
-                        }
-                        speakers.close();
-                        serverSocket.close();
-                    } catch (SocketTimeoutException ex) {
-                        System.out.println("Timeout error: " + ex.getMessage());
-                        ex.printStackTrace();
-                    } catch (IOException ex) {
-                        System.out.println("Client error: " + ex.getMessage());
-                        ex.printStackTrace();
-                    }
-                } catch (LineUnavailableException ex) {
-                    ex.printStackTrace();
-                }
-            }
-
-        };
-        listenThread.start();
-    }
-
-    private int getMax(byte[] bytes) {
-        int max = bytes[0];
-        for (int i = 1; i < bytes.length; i++) {
-            if (bytes[i] > max) max = bytes[i];
-        }
-        return max;
-    }
-
-    public double volumeRMS(byte[] raw) {
-        double sum = 0d;
-        if (raw.length == 0) {
-            return sum;
-        } else {
-            for (byte b : raw) {
-                sum += b;
-            }
-        }
-        double average = sum / raw.length;
-
-        double sumMeanSquare = 0d;
-        for (byte b : raw) {
-            sumMeanSquare += Math.pow(b - average, 2d);
-        }
-        double averageMeanSquare = sumMeanSquare / raw.length;
-        return Math.sqrt(averageMeanSquare);
-    }
-
-    public void voiceStopListening() {
-        isListening = false;
-    }
-
-    public void addVoiceMessage(String message) {
-        String temp = messageTextArea.getText();
-        temp += competitor.getNickname() + " " + message + "\n";
-        messageTextArea.setText(temp);
-        messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
-    }
-
+    //vao game moi, khi choi game dau tien thi chu phong di sau, khach di truoc
     public void newgame() {
 
         if (numberOfMatch % 2 == 0) {
@@ -1206,8 +357,8 @@ public class GameClientFrm extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, "Đối thủ đi trước");
             displayCompetitorTurn();
         }
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 button[i][j].setIcon(new ImageIcon("assets/image/blank.jpg"));
                 button[i][j].setDisabledIcon(new ImageIcon("assets/image/border.jpg"));
                 button[i][j].setText("");
@@ -1227,6 +378,7 @@ public class GameClientFrm extends javax.swing.JFrame {
         numberOfMatch++;
     }
 
+    //update số game chơi lên 1 khi cả 2 đồng ý chơi lại ván mới
     public void updateNumberOfGame() {
         competitor.setNumberOfGame(competitor.getNumberOfGame() + 1);
         competotorNumberOfGameValue.setText(Integer.toString(competitor.getNumberOfGame()));
@@ -1234,24 +386,25 @@ public class GameClientFrm extends javax.swing.JFrame {
         playerNumberOfGameValue.setText(Integer.toString(Client.user.getNumberOfGame()));
     }
 
+    // duoc goi tu hàm newGame, setup ban co ban dau cho nguoi di sau
     public void blockGame() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 button[i][j].setBackground(Color.white);
                 button[i][j].setDisabledIcon(new ImageIcon("assets/image/border.jpg"));
                 button[i][j].setText("");
                 competitorMatrix[i][j] = 0;
                 matrix[i][j] = 0;
-                drawRequestButton.setVisible(false);
             }
         }
         timer.stop();
         setEnableButton(false);
     }
 
+    //set toan bo button trong ma tran la gia tri bool truyền vào
     public void setEnableButton(boolean b) {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 if (matrix[i][j] == 0) {
                     button[i][j].setEnabled(b);
                 }
@@ -1263,8 +416,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, hang = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 if (check) {
                     if (competitorMatrix[i][j] == 1) {
                         hang++;
@@ -1302,8 +455,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cot = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int j = 0; j < size; j++) {
-            for (int i = 0; i < size; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            for (int i = 0; i < SIZE; i++) {
                 if (check) {
                     if (competitorMatrix[i][j] == 1) {
                         cot++;
@@ -1341,8 +494,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cheop = 0, n = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = size - 1; i >= 0; i--) {
-            for (int j = 0; j < size; j++) {
+        for (int i = SIZE - 1; i >= 0; i--) {
+            for (int j = 0; j < SIZE; j++) {
                 if (check) {
                     if (n - j >= 0 && competitorMatrix[n - j][j] == 1) {
                         cheop++;
@@ -1382,8 +535,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cheot = 0, n = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            for (int j = size - 1; j >= 0; j--) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = SIZE - 1; j >= 0; j--) {
                 if (check) {
                     if (n - j - 2 * cheot >= 0 && competitorMatrix[n - j - 2 * cheot][j] == 1) {
                         list.add(button[n - j - 2 * cheot][j]);
@@ -1424,8 +577,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, hang = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 if (check) {
                     if (userMatrix[i][j] == 1) {
                         hang++;
@@ -1463,8 +616,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cot = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int j = 0; j < size; j++) {
-            for (int i = 0; i < size; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            for (int i = 0; i < SIZE; i++) {
                 if (check) {
                     if (userMatrix[i][j] == 1) {
                         cot++;
@@ -1501,8 +654,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cheop = 0, n = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = size - 1; i >= 0; i--) {
-            for (int j = 0; j < size; j++) {
+        for (int i = SIZE - 1; i >= 0; i--) {
+            for (int j = 0; j < SIZE; j++) {
                 if (check) {
                     if (n >= j && userMatrix[n - j][j] == 1) {
                         cheop++;
@@ -1542,8 +695,8 @@ public class GameClientFrm extends javax.swing.JFrame {
         int win = 0, cheot = 0, n = 0;
         boolean check = false;
         List<JButton> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            for (int j = size - 1; j >= 0; j--) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = SIZE - 1; j >= 0; j--) {
                 if (check) {
                     if (n - j - 2 * cheot >= 0 && userMatrix[n - j - 2 * cheot][j] == 1) {
                         list.add(button[n - j - 2 * cheot][j]);
@@ -1601,11 +754,454 @@ public class GameClientFrm extends javax.swing.JFrame {
             Client.openView(Client.View.GAME_NOTICE, "Bạn đã thua", "Đang thiết lập ván chơi mới");
         }
     }
+    
+    // hàm exit game ở nút menu
+    public void exitGame() {
+        try {
+            timer.stop();
+            Client.socketHandle.write("left-room,");
+            Client.closeAllViews();
+            Client.openView(Client.View.HOMEPAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+        }
+        Client.closeAllViews();
+        Client.openView(Client.View.HOMEPAGE);
+    }
 
-    /**
-     * @param args the command line arguments
-     */
+    // gọi khi muốn đóng frm này lại, để dừng timer
+    public void stopAllThread() {
+        timer.stop();
+    }
 
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jFrame1 = new javax.swing.JFrame();
+        jFrame2 = new javax.swing.JFrame();
+        jFrame3 = new javax.swing.JFrame();
+        jFrame4 = new javax.swing.JFrame();
+        playerNumberOfWinLabel = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        playerNicknameLabel = new javax.swing.JLabel();
+        playerNumberOfGameLabel = new javax.swing.JLabel();
+        competitorNumberOfWinLabel = new javax.swing.JLabel();
+        competitorNicknameLabel = new javax.swing.JLabel();
+        competotorNumberOfGameLabel = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        messageTextArea = new javax.swing.JTextArea();
+        playerNicknameValue = new javax.swing.JLabel();
+        playerNumberOfGameValue = new javax.swing.JLabel();
+        playerNumberOfWinValue = new javax.swing.JLabel();
+        competitorNicknameValue = new javax.swing.JLabel();
+        competotorNumberOfGameValue = new javax.swing.JLabel();
+        competitorNumberOfWinValue = new javax.swing.JLabel();
+        gamePanel = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        playerLabel = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        competitorLabel = new javax.swing.JLabel();
+        messageTextField = new javax.swing.JTextField();
+        sendButton = new javax.swing.JButton();
+        competotorButtonImage = new javax.swing.JButton();
+        playerButtonImage = new javax.swing.JLabel();
+        scoreLabel = new javax.swing.JLabel();
+        playerCurrentPositionLabel = new javax.swing.JLabel();
+        competitorPositionLabel = new javax.swing.JLabel();
+        playerTurnLabel = new javax.swing.JLabel();
+        countDownLabel = new javax.swing.JLabel();
+        competitorTurnLabel = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        mainMenu = new javax.swing.JMenu();
+        exitMenuItem = new javax.swing.JMenuItem();
+
+        javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
+        jFrame1.getContentPane().setLayout(jFrame1Layout);
+        jFrame1Layout.setHorizontalGroup(
+            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame1Layout.setVerticalGroup(
+            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jFrame2Layout = new javax.swing.GroupLayout(jFrame2.getContentPane());
+        jFrame2.getContentPane().setLayout(jFrame2Layout);
+        jFrame2Layout.setHorizontalGroup(
+            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame2Layout.setVerticalGroup(
+            jFrame2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jFrame3Layout = new javax.swing.GroupLayout(jFrame3.getContentPane());
+        jFrame3.getContentPane().setLayout(jFrame3Layout);
+        jFrame3Layout.setHorizontalGroup(
+            jFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame3Layout.setVerticalGroup(
+            jFrame3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jFrame4Layout = new javax.swing.GroupLayout(jFrame4.getContentPane());
+        jFrame4.getContentPane().setLayout(jFrame4Layout);
+        jFrame4Layout.setHorizontalGroup(
+            jFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame4Layout.setVerticalGroup(
+            jFrame4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setAutoRequestFocus(false);
+
+        playerNumberOfWinLabel.setText("Số ván thắng");
+
+        playerNicknameLabel.setText("Nickname");
+
+        playerNumberOfGameLabel.setText("Số ván chơi");
+
+        competitorNumberOfWinLabel.setText("Số ván thắng");
+
+        competitorNicknameLabel.setText("Nickname");
+
+        competotorNumberOfGameLabel.setText("Số ván chơi");
+
+        messageTextArea.setColumns(20);
+        messageTextArea.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        messageTextArea.setRows(5);
+        jScrollPane1.setViewportView(messageTextArea);
+
+        playerNicknameValue.setText("{nickname}");
+
+        playerNumberOfGameValue.setText("{sovanchoi}");
+
+        playerNumberOfWinValue.setText("{sovanthang}");
+
+        competitorNicknameValue.setText("{nickname}");
+
+        competotorNumberOfGameValue.setText("{sovanchoi}");
+
+        competitorNumberOfWinValue.setText("{sovanthang}");
+
+        gamePanel.setBackground(new java.awt.Color(102, 102, 102));
+
+        javax.swing.GroupLayout gamePanelLayout = new javax.swing.GroupLayout(gamePanel);
+        gamePanel.setLayout(gamePanelLayout);
+        gamePanelLayout.setHorizontalGroup(
+            gamePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 639, Short.MAX_VALUE)
+        );
+        gamePanelLayout.setVerticalGroup(
+            gamePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 640, Short.MAX_VALUE)
+        );
+
+        jPanel2.setBackground(new java.awt.Color(102, 102, 102));
+
+        playerLabel.setForeground(new java.awt.Color(255, 255, 255));
+        playerLabel.setText("Bạn");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(playerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(188, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(playerLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel3.setBackground(new java.awt.Color(102, 102, 102));
+        jPanel3.setForeground(new java.awt.Color(102, 102, 102));
+
+        competitorLabel.setForeground(new java.awt.Color(255, 255, 255));
+        competitorLabel.setText("Đối thủ");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(197, Short.MAX_VALUE)
+                .addComponent(competitorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(competitorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        messageTextField.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        messageTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                messageTextFieldKeyPressed(evt);
+            }
+        });
+
+        sendButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendButtonActionPerformed(evt);
+            }
+        });
+
+        competotorButtonImage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                competotorButtonImageActionPerformed(evt);
+            }
+        });
+
+        playerButtonImage.setBackground(new java.awt.Color(102, 102, 102));
+
+        scoreLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        scoreLabel.setText("Tỉ số:  0-0");
+
+        playerCurrentPositionLabel.setText("x/o");
+
+        competitorPositionLabel.setText("x/o");
+
+        playerTurnLabel.setForeground(new java.awt.Color(255, 0, 0));
+        playerTurnLabel.setText("Đến lượt bạn");
+
+        countDownLabel.setForeground(new java.awt.Color(255, 0, 0));
+        countDownLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        countDownLabel.setText("Thời gian:00:20");
+
+        competitorTurnLabel.setForeground(new java.awt.Color(0, 0, 204));
+        competitorTurnLabel.setText("Đến lượt đối thủ");
+
+        mainMenu.setText("Menu");
+        mainMenu.setToolTipText("");
+
+        exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_DOWN_MASK));
+        exitMenuItem.setText("Thoát");
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuItemActionPerformed(evt);
+            }
+        });
+        mainMenu.add(exitMenuItem);
+
+        jMenuBar1.add(mainMenu);
+
+        setJMenuBar(jMenuBar1);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(competitorPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(22, 22, 22))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(messageTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(9, 9, 9))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(90, 90, 90)
+                                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(playerNumberOfGameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(playerNicknameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(26, 26, 26)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(playerNumberOfGameValue)
+                                            .addComponent(playerNicknameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(26, 26, 26)
+                                        .addComponent(playerButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(playerTurnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(playerNumberOfWinLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(26, 26, 26)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(playerNumberOfWinValue, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addGap(18, 18, 18)
+                                                .addComponent(countDownLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(competitorTurnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(11, 11, 11)))))
+                                .addGap(0, 12, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(competotorNumberOfGameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(competitorNicknameLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(competitorNumberOfWinLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(competotorNumberOfGameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(competitorNumberOfWinValue, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(competitorNicknameValue, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(competotorButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(62, 62, 62))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                    .addGap(29, 29, 29)
+                                    .addComponent(playerCurrentPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(scoreLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(gamePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(playerNicknameLabel)
+                            .addComponent(playerNicknameValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(playerNumberOfGameLabel)
+                            .addComponent(playerNumberOfGameValue))
+                        .addGap(18, 18, 18))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addComponent(playerButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(playerNumberOfWinLabel)
+                    .addComponent(playerNumberOfWinValue))
+                .addGap(54, 54, 54)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(playerCurrentPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(scoreLabel)
+                    .addComponent(competitorPositionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(playerTurnLabel)
+                    .addComponent(countDownLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(competitorTurnLabel))
+                .addGap(66, 66, 66)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel7)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(competitorNicknameLabel)
+                            .addComponent(competitorNicknameValue))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(competotorNumberOfGameLabel)
+                            .addComponent(competotorNumberOfGameValue))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(competitorNumberOfWinLabel)
+                            .addComponent(competitorNumberOfWinValue))
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
+                            .addComponent(messageTextField))
+                        .addContainerGap(12, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addComponent(competotorButtonImage, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(gamePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        //for(int i=0; i<5; i++){
+            //    for(int j=0;j<5;j++){
+                //        gamePanel.add(button[i][j]);
+                //    }
+            //}
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // ấn nút exit game ở menu
+    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+        exitGame();
+    }//GEN-LAST:event_exitMenuItemActionPerformed
+
+    // ấn nút gửi tin nhắn
+    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
+        try {
+            if (messageTextField.getText().isEmpty()) {
+                throw new Exception("Vui lòng nhập nội dung tin nhắn");
+            }
+            String temp = messageTextArea.getText();
+            temp += "Tôi: " + messageTextField.getText() + "\n";
+            messageTextArea.setText(temp);
+            Client.socketHandle.write("chat," + messageTextField.getText());
+            messageTextField.setText("");
+            messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+        }
+    }//GEN-LAST:event_sendButtonActionPerformed
+
+    // nếu ấn phím enter thì sẽ gửi tin nhắn đi
+    private void messageTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_messageTextFieldKeyPressed
+        if (evt.getKeyCode() == 10) {
+            try {
+                if (messageTextField.getText().isEmpty()) {
+                    return;
+                }
+                String temp = messageTextArea.getText();
+                temp += "Tôi: " + messageTextField.getText() + "\n";
+                messageTextArea.setText(temp);
+                Client.socketHandle.write("chat," + messageTextField.getText());
+                messageTextField.setText("");
+                messageTextArea.setCaretPosition(messageTextArea.getDocument().getLength());
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(rootPane, ex.getMessage());
+            }
+        }
+    }//GEN-LAST:event_messageTextFieldKeyPressed
+
+    // ấn vào ảnh của đổi thủ thì sẽ hiện info đối thủ lên
+    private void competotorButtonImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_competotorButtonImageActionPerformed
+        Client.openView(Client.View.COMPETITOR_INFO, competitor);
+    }//GEN-LAST:event_competotorButtonImageActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel competitorLabel;
@@ -1619,11 +1215,8 @@ public class GameClientFrm extends javax.swing.JFrame {
     private javax.swing.JLabel competotorNumberOfGameLabel;
     private javax.swing.JLabel competotorNumberOfGameValue;
     private javax.swing.JLabel countDownLabel;
-    private javax.swing.JButton drawRequestButton;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JPanel gamePanel;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JMenuItem helpMenuItem;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
     private javax.swing.JFrame jFrame3;
@@ -1632,16 +1225,10 @@ public class GameClientFrm extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JMenu mainMenu;
     private javax.swing.JTextArea messageTextArea;
     private javax.swing.JTextField messageTextField;
-    private javax.swing.JButton microphoneStatusButton;
-    private javax.swing.JMenuItem newGameMenuItem;
     private javax.swing.JLabel playerButtonImage;
     private javax.swing.JLabel playerCurrentPositionLabel;
     private javax.swing.JLabel playerLabel;
@@ -1652,12 +1239,8 @@ public class GameClientFrm extends javax.swing.JFrame {
     private javax.swing.JLabel playerNumberOfWinLabel;
     private javax.swing.JLabel playerNumberOfWinValue;
     private javax.swing.JLabel playerTurnLabel;
-    private javax.swing.JLabel roomNameLabel;
     private javax.swing.JLabel scoreLabel;
     private javax.swing.JButton sendButton;
-    private javax.swing.JButton speakerStatusButton;
-    private javax.swing.JLabel vsIcon;
     // End of variables declaration//GEN-END:variables
-
 
 }
