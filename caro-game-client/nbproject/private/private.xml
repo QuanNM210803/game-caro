@@ -5,10 +5,10 @@
         <group>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/RoomNameFrm.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/HomePageFrm.java</file>
-            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/FindRoomFrm.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/controller/Client.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/RoomListFrm.java</file>
             <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/controller/SocketHandle.java</file>
+            <file>file:/C:/Project/Learn/Year4/LTM/game-caro/caro-game-client/src/view/RankFrm.java</file>
         </group>
     </open-files>
 </project-private>
